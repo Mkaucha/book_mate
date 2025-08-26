@@ -30,15 +30,24 @@ a {
   position: sticky;
   top: 0;
   z-index: 1000;
+  box-shadow: -1px 10px 5px -5px rgba(0,0,0,0.1);
+-webkit-box-shadow: -1px 10px 5px -5px rgba(0,0,0,0.1);
+-moz-box-shadow: -1px 10px 5px -5px rgba(0,0,0,0.1);
 }
 .flex-between {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .logo {
   font-weight: bold;
   font-size: 1.2rem;
+  display: flex;
+}
+.logo img{
+  max-width: 35px; 
+  margin-right: 5px;
 }
 .nav a {
   margin: 0 10px;
@@ -83,6 +92,7 @@ a {
   background: #f8f8f8;
   border-radius: 10px;
   transition: 0.3s;
+  cursor: pointer;
 }
 .topic:hover {
   background: #e0f2ff;
@@ -111,7 +121,12 @@ a {
   text-align: center;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
 }
+.book-card:hover {
+  background: #4e73df;
+}
+
 
 /* Top Reader */
 .top-reader {
