@@ -8,7 +8,9 @@ nav a{
 nav a:hover{
   color: #0d6efd;
 }
-
+.mt-7{
+  margin-top: 70px !important;
+}
 .collections .cards{
   transition: all .3s ease-in-out;
   -webkit-transition: all .3s ease-in-out;
@@ -22,10 +24,25 @@ nav a:hover{
   -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,.1);
 }
 
+.collections a{
+  text-decoration: none;
+  color: inherit;
+}
 .collections .cards img{
   margin-bottom: 10px;
 }
 
 .collections .cards p{
   font-size: 12px;
+}
+
+.detail .book-cover{
+  height: 250px;
+  background-color: bisque;
+  padding: 30px;
+  border-radius: 5px;
+
+}
+.detail .book-cover img{
+  width: 150px;
 }
