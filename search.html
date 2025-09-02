@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo Library - Free Online Library Management System</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .book-card img {
+      height: 150px;
+      object-fit: contain;
+    }
+    .sidebar.book_filter {
+      max-width: 280px;
+    }
+    .search-bar {
+      max-width: 600px;
+    }
+    .sidebar.book_filter input{
+        border: 1px solid #212529;
+    }
+    #resultsInfo .card-title a{
+        text-decoration: none;
+        color: #212529;
+    }
+    #resultsInfo .card{
+        transition: all .3s ease-in-out;
+        -webkit-transition: all .3s ease-in-out;
+        -moz-transition: all .3s ease-in-out;
+    }
+    #resultsInfo .card:hover{
+        box-shadow: -0 9px 10px 0 rgba(0,0,0,.1);
+        -webkit-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+        -moz-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+    }
+    #resultsInfo .description{
+        font-size: 12px;
+        font-weight: initial;
+    }
+    #resultsInfo .tag{
+        color: #6c757d;
+        font-size: 12px;
+
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="bg-light py-3 border-bottom">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <img src="img/icon.png" alt="Book Mate Logo" width="30" class="me-2" />
+        <span class="fs-4 fw-bold">Book Mate</span>
+      </div>
+      <nav>
+        <a href="/" class="me-3 text-decoration-none">Home</a>
+        <a href="#" class="me-3 text-decoration-none">Information</a>
+        <a href="#" class="me-3 text-decoration-none">Help</a>
+        <a href="#" class="me-3 text-decoration-none">Librarian</a>
+        <a href="#" class="me-3 text-decoration-none">Admin Login</a>
+        <a href="member_login.html" class="text-decoration-none">Member Area</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- Main Content -->
+  <div class="container my-4">
+    <div class="row">
+
+      <!-- Sidebar Filters -->
+      <aside class="sidebar book_filter col-lg-3 mb-4">
+        <div class="card border-0">
+          <div class="card-body">
+            <h5 class="card-title">Filters</h5>
+
+            <form id="filtersForm">
+              <!-- Publication Year -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Publication Year</label>
+                <div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="year" id="yearAll" value="all" checked />
+                    <label class="form-check-label" for="yearAll">All</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="year" id="year2023" value="2023" />
+                    <label class="form-check-label" for="year2023">2023</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="year" id="year2022" value="2022" />
+                    <label class="form-check-label" for="year2022">2022</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="year" id="year2021" value="2021" />
+                    <label class="form-check-label" for="year2021">2021</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Availability -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Availability</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="availability" id="availabilityOnShelf" value="onShelf" />
+                  <label class="form-check-label" for="availabilityOnShelf">On Shelf</label>
+                </div>
+              </div>
+
+              <!-- Attachment -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Attachment</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentPdf" value="pdf" />
+                  <label class="form-check-label" for="attachmentPdf">PDF</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentAudio" value="audio" />
+                  <label class="form-check-label" for="attachmentAudio">Audio</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentVideo" value="video" />
+                  <label class="form-check-label" for="attachmentVideo">Video</label>
+                </div>
+              </div>
+
+              <!-- Collection Type -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Collection Type</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionReference" value="reference" />
+                  <label class="form-check-label" for="collectionReference">Reference</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionTextbook" value="textbook" />
+                  <label class="form-check-label" for="collectionTextbook">Textbook</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionFiction" value="fiction" />
+                  <label class="form-check-label" for="collectionFiction">Fiction</label>
+                </div>
+              </div>
+
+              <!-- General Material Designation -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">General Material Designation</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="material" id="materialText" value="text" />
+                  <label class="form-check-label" for="materialText">Text</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="material" id="materialArt" value="art" />
+                  <label class="form-check-label" for="materialArt">Art Original</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="material" id="materialChart" value="chart" />
+                  <label class="form-check-label" for="materialChart">Chart</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="material" id="materialSoftware" value="software" />
+                  <label class="form-check-label" for="materialSoftware">Computer Software</label>
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Location</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="location" id="locationMyLibrary" value="myLibrary" />
+                  <label class="form-check-label" for="locationMyLibrary">My Library</label>
+                </div>
+              </div>
+
+              <!-- Language -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Language</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="language" id="languageEnglish" value="english" />
+                  <label class="form-check-label" for="languageEnglish">English</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="language" id="languageIndonesia" value="indonesia" />
+                  <label class="form-check-label" for="languageIndonesia">Indonesia</label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Area -->
+      <main class="col-lg-9">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 p-3">
+            <div class="mb-2">
+                Found<strong> 15</strong> from your keywords:
+            </div>
+            <div class="d-flex align-items-center">
+                <label for="sortBy" class="form-label mb-0" style="min-width:65px;"><strong>Sort by</strong></label>
+                <select class="form-select form-select-sm" id="sortBy">
+                <option selected>Most relevant</option>
+                <option>Newest</option>
+                <option>Title A-Z</option>
+                <option>Title Z-A</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div id="resultsInfo" class="mb-3 text-muted fw-semibold">
+            <div class="card p-3 mb-4 bg-light">
+                <div class="row g-3">
+                <div class="col-auto">
+                    <img src="img/ajax.jpg" alt="PostgreSQL book" class="book-image" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title">
+                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
+                    </h5>
+                    <div class="mb-2">
+                    <span class="tag">Douglas, Korry</span>
+                    <span class="tag">Douglas, Susan</span>
+                    </div>
+                    <p class="card-text description">
+                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
+                    </p>
+                </div>
+                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
+                    <div class="availability-box">1</div>
+                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
+                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="card p-3 mb-4 bg-light">
+                <div class="row g-3">
+                <div class="col-auto">
+                    <img src="img/postgres.jpg" alt="PostgreSQL book" class="book-image" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title">
+                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
+                    </h5>
+                    <div class="mb-2">
+                    <span class="tag">Douglas, Korry</span>
+                    <span class="tag">Douglas, Susan</span>
+                    </div>
+                    <p class="card-text description">
+                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
+                    </p>
+                </div>
+                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
+                    <div class="availability-box">1</div>
+                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
+                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="card p-3 mb-4 bg-light">
+                <div class="row g-3">
+                <div class="col-auto">
+                    <img src="img/information.jpg " alt="PostgreSQL book" class="book-image" />
+                </div>
+                <div class="col">
+                    <h5 class="card-title">
+                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
+                    </h5>
+                    <div class="mb-2">
+                    <span class="tag">Douglas, Korry</span>
+                    <span class="tag">Douglas, Susan</span>
+                    </div>
+                    <p class="card-text description">
+                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
+                    </p>
+                </div>
+                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
+                    <div class="availability-box">1</div>
+                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
+                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation example" class="mt-4">
+          <ul class="pagination justify-content-center" id="pagination"></ul>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-5 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <h5>Book Mate</h5>
+          <p>Information<br />Services<br />Librarian<br />Member Area</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h5>About Us</h5>
+          <p>
+            The platform will allow users to browse books, reserve items, extend their booking period, manage their
+            account and so on. On the other side, the library staff can easily track inventories, manage loaned books,
+            automate payments, track users and automate reminders.
+          </p>
+        </div>
+        <div class="col-md-4">
+          <h5>Search</h5>
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Enter keywords" />
+            <button class="btn btn-secondary">Find Collection</button>
+          </div>
+        </div>
+      </div>
+      <p class="text-center mt-4 mb-0">&copy; 2025. Powered by Milan, Sahamat and Prashant</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
