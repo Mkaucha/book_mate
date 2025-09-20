@@ -47,3 +47,39 @@ nav a:hover{
   width: 150px;
 }
 
+.book-card img {
+  height: 150px;
+  object-fit: contain;
+}
+.sidebar.book_filter {
+  max-width: 280px;
+}
+.search-bar {
+  max-width: 600px;
+}
+.sidebar.book_filter input{
+    border: 1px solid #212529;
+}
+#resultsInfo .card-title a{
+    text-decoration: none;
+    color: #212529;
+}
+#resultsInfo .card{
+    transition: all .3s ease-in-out;
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+}
+#resultsInfo .card:hover{
+    box-shadow: -0 9px 10px 0 rgba(0,0,0,.1);
+    -webkit-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+    -moz-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+}
+#resultsInfo .description{
+    font-size: 12px;
+    font-weight: initial;
+}
+#resultsInfo .tag{
+    color: #6c757d;
+    font-size: 12px;
+
+}

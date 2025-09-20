@@ -1,72 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo Library - Free Online Library Management System</title>
-  <!-- Bootstrap CSS CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .book-card img {
-      height: 150px;
-      object-fit: contain;
-    }
-    .sidebar.book_filter {
-      max-width: 280px;
-    }
-    .search-bar {
-      max-width: 600px;
-    }
-    .sidebar.book_filter input{
-        border: 1px solid #212529;
-    }
-    #resultsInfo .card-title a{
-        text-decoration: none;
-        color: #212529;
-    }
-    #resultsInfo .card{
-        transition: all .3s ease-in-out;
-        -webkit-transition: all .3s ease-in-out;
-        -moz-transition: all .3s ease-in-out;
-    }
-    #resultsInfo .card:hover{
-        box-shadow: -0 9px 10px 0 rgba(0,0,0,.1);
-        -webkit-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
-        -moz-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
-    }
-    #resultsInfo .description{
-        font-size: 12px;
-        font-weight: initial;
-    }
-    #resultsInfo .tag{
-        color: #6c757d;
-        font-size: 12px;
-
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Header -->
-  <header class="bg-light py-3 border-bottom">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center">
-        <img src="img/icon.png" alt="Book Mate Logo" width="30" class="me-2" />
-        <span class="fs-4 fw-bold">Book Mate</span>
-      </div>
-      <nav>
-        <a href="/" class="me-3 text-decoration-none">Home</a>
-        <a href="#" class="me-3 text-decoration-none">Information</a>
-        <a href="#" class="me-3 text-decoration-none">Help</a>
-        <a href="#" class="me-3 text-decoration-none">Librarian</a>
-        <a href="#" class="me-3 text-decoration-none">Admin Login</a>
-        <a href="member_login.html" class="text-decoration-none">Member Area</a>
-      </nav>
-    </div>
-  </header>
-
-
+<?php
+  include 'header.php';
+?>
   <!-- Main Content -->
   <div class="container my-4">
     <div class="row">
@@ -299,35 +233,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="bg-dark text-white py-5 mt-5">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <h5>Book Mate</h5>
-          <p>Information<br />Services<br />Librarian<br />Member Area</p>
-        </div>
-        <div class="col-md-4 mb-3">
-          <h5>About Us</h5>
-          <p>
-            The platform will allow users to browse books, reserve items, extend their booking period, manage their
-            account and so on. On the other side, the library staff can easily track inventories, manage loaned books,
-            automate payments, track users and automate reminders.
-          </p>
-        </div>
-        <div class="col-md-4">
-          <h5>Search</h5>
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Enter keywords" />
-            <button class="btn btn-secondary">Find Collection</button>
-          </div>
-        </div>
-      </div>
-      <p class="text-center mt-4 mb-0">&copy; 2025. Powered by Milan, Sahamat and Prashant</p>
-    </div>
-  </footer>
-
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php
+  include 'footer.php';
+?>
