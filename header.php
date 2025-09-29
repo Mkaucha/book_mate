@@ -21,7 +21,7 @@
       <nav>
         <a href="index.php" class="me-3 text-decoration-none">Home</a>
         <a href="login.html" target="_blank" class="me-3 text-decoration-none">Admin Login</a>
-        <a href="member_login.html" class="text-decoration-none">Member Area</a>
+        <a href="member_login.php" class="text-decoration-none">Member Area</a>
       </nav>
     </div>
   </header>
