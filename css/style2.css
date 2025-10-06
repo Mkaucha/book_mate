@@ -1,0 +1,114 @@
+nav a{
+  color: #000;
+  transition: all .3s ease-in-out;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+}
+.search{
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+}
+.dropdown .btn{
+  background: #667eea !important;
+  color: #fff !important;
+}
+.dropdown a:hover{
+    background: #d4d4d4;
+}
+.search a{
+  text-decoration: none;
+  color: inherit;
+}
+nav a:hover{
+  color: #0d6efd;
+}
+.mt-7{
+  margin-top: 70px !important;
+}
+.collections .cards{
+  transition: all .3s ease-in-out;
+  -webkit-transition: all .3s ease-in-out;
+  -moz-transition: all .3s ease-in-out;
+}
+
+.collections .cards:hover{
+  cursor: pointer;
+  box-shadow: -0 2px 4px 0 rgba(0,0,0,.1);
+  -webkit-box-shadow: 0 2px 4px 0 rgba(0,0,0,.1);
+  -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,.1);
+}
+
+.collections a{
+  text-decoration: none;
+  color: inherit;
+}
+.collections .cards img{
+  margin-bottom: 10px;
+}
+
+.collections .cards p{
+  font-size: 12px;
+}
+
+.detail .book-cover{
+  height: 250px;
+  background-color: #d4d4d4;   
+  padding: 30px;
+  border-radius: 5px;
+
+}
+.detail .book-cover img{
+  width: 150px;
+}
+
+.book-card img {
+  height: 150px;
+  object-fit: contain;
+}
+.sidebar.book_filter {
+  max-width: 280px;
+}
+.search-bar {
+  max-width: 600px;
+}
+.sidebar.book_filter input{
+    border: 1px solid #212529;
+}
+#resultsInfo .card-title a{
+    text-decoration: none;
+    color: #212529;
+}
+#resultsInfo .card{
+    transition: all .3s ease-in-out;
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+}
+#resultsInfo .card:hover{
+    box-shadow: -0 9px 10px 0 rgba(0,0,0,.1);
+    -webkit-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+    -moz-box-shadow: 0 9px 10px 0 rgba(0,0,0,.1);
+}
+#resultsInfo .description{
+    font-size: 12px;
+    font-weight: initial;
+}
+#resultsInfo .tag{
+    color: #6c757d;
+    font-size: 12px;
+
+}
+.availability-box{
+  padding: 15px;
+  border: 1px solid #cccccc;
+  text-align: center;
+  height: 90px;
+  color: #5a5a5a;
+}
+.availability-box span{
+  display:block;
+  margin-bottom: 11px;
+}
+
+.logo-section a{
+  text-decoration: none;
+  color: inherit;
+}

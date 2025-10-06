@@ -1,173 +1,82 @@
 <?php
-  include 'header.php';
+require_once 'config/settings.php';
+require_once 'includes/auth.php';
+
+function sanitize($value) {
+    return htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
+}
+
+if (isLoggedIn()) {
+    if (isAdmin()) {
+        header("Location: admin_dashboard.php");
+    } else {
+        header("Location: home.php");
+    }
+    exit();
+}
+
+$login_error = '';
+if ($_POST) {
+    $username = isset($_POST['username']) ? sanitize($_POST['username']) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+
+    if (login($username, $password)) {
+        if (isAdmin()) {
+            header("Location: admin_dashboard.php");
+        } else {
+            header("Location: home.php");
+        }
+        exit();
+    } else {
+        $login_error = 'Invalid username or password';
+    }
+}
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo SITE_NAME; ?></title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1><img src="img/icon.png" alt="Logo" width="30" class="me-2"> BookMate</h1>
+                <p>Library Management System</p>
+            </div>
 
-  <!-- Hero Search -->
-  <section class="py-5 bg-primary text-white text-center search">
-    <div class="container">
-      <div class="input-group w-75 mx-auto">
-        <input type="text" class="form-control" placeholder="Enter keyword to search collection...">
-        <button class="btn btn-dark"><a href="search.php">Search</a></button>
-      </div>
+            <?php if ($login_error): ?>
+                <div class="alert alert-error"><?php echo $login_error; ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required 
+                           value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">Login</button>
+            </form>
+
+            <div class="login-links">
+                <a href="register.php">Create New Account</a>
+            </div>
+
+            <div class="demo-accounts">
+                <h3>Demo Accounts</h3>
+                <p><strong>Admin:</strong> username: admin, password: admin123</p>
+                <p><strong>Customer:</strong> Register a new account</p>
+            </div>
+        </div>
     </div>
-  </section>
-
-  <!-- Topics -->
-  <section class="py-5 collections">
-    <div class="container">
-      <h2 class="mb-4">Select the topic you are interested in</h2>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
-   
-          <div class="col">
-            <div class="p-3 bg-light border rounded text-center cards">
-              <img src="img/literature.png" alt="">
-              <p>Literature</p>
-            </div>
-          </div>
-      
-        <div class="col">
-          <div class="p-3 bg-light border rounded text-center cards">
-            <img src="img/social-science.png" alt="">
-            <p>Social Sciences</p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="p-3 bg-light border rounded text-center cards">
-            <img src="img/science.png" alt="">
-            <p>Applied Sciences</p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="p-3 bg-light border rounded text-center cards">
-            <img src="img/prototype.png" alt="">
-            <p>Art & Recreation</p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="p-3 bg-light border rounded text-center cards">
-            <img src="img/application.png" alt="">
-            <p>See More</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Popular Collections -->
-  <section class="py-5 bg-light collections">
-    <div class="container">
-      <h2 class="mb-3">Popular among our collections</h2>
-      <div class="mb-3">
-        <span class="badge bg-secondary me-2">Programming</span>
-        <span class="badge bg-secondary me-2">Website</span>
-        <span class="badge bg-secondary me-2">Operating System</span>
-        <span class="badge bg-secondary me-2">Linux</span>
-        <span class="badge bg-secondary">Computer</span>
-      </div>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/postgres.jpg" alt="">
-              <p>Dive into PostgreSQL with this comprehensive guide that covers everything from installation to advanced
-                features. Ideal for developers, DBAs, and data enthusiasts wanting to master PostgreSQL.</p>
-            </div>
-          </a>
-          </div>
-          <div class="col">
-            <a href="book_detail.php">
-              <div class="p-3 bg-white border rounded text-center cards">
-                <img src="img/ajax.jpg" alt="">
-                <p>"Discover the essentials of AJAX—Asynchronous JavaScript and XML—a powerful technique that enables dynamic, fast, and seamless web page updates without full reloads. Perfect for building modern interactive web applications."</p>
-              </div>
-            </a>
-          </div>
-          <div class="col">
-            <a href="book_detail.php">
-              <div class="p-3 bg-white border rounded text-center cards">
-                <img src="img/web.jpg" alt="">
-                <p>"Explore the foundations of modern web architecture, including client-server models, APIs, microservices, and scalable design patterns. This guide helps developers build robust, efficient, and maintainable web applications."</p>
-              </div>
-            </a>
-          </div>
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/producing.jpg" alt="">
-              <p>A practical guide to successfully leading and managing open source projects. This book covers collaboration, licensing, community building, infrastructure, and the social dynamics behind sustainable open source development.</p>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/information.jpg" alt="">
-              <p>Learn how to structure and organize digital content for clarity, usability, and efficiency. This book introduces core principles of information architecture, helping designers and developers create intuitive websites and apps that users can navigate with ease</p>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- New Collections -->
-  <section class="py-5 collections">
-    <div class="container">
-      <h2 class="mb-3">New collections + updated</h2>
-      <div class="mb-3">
-        <span class="badge bg-secondary me-2">Programming</span>
-        <span class="badge bg-secondary me-2">Website</span>
-        <span class="badge bg-secondary me-2">Operating System</span>
-        <span class="badge bg-secondary me-2">Linux</span>
-        <span class="badge bg-secondary">Computer</span>
-      </div>
-     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/postgres.jpg" alt="">
-              <p>Dive into PostgreSQL with this comprehensive guide that covers everything from installation to advanced
-                features. Ideal for developers, DBAs, and data enthusiasts wanting to master PostgreSQL.</p>
-            </div>
-          </a>
-          </div>
-          <div class="col">
-            <a href="book_detail.php">
-              <div class="p-3 bg-white border rounded text-center cards">
-                <img src="img/ajax.jpg" alt="">
-                <p>"Discover the essentials of AJAX—Asynchronous JavaScript and XML—a powerful technique that enables dynamic, fast, and seamless web page updates without full reloads. Perfect for building modern interactive web applications."</p>
-              </div>
-            </a>
-          </div>
-          <div class="col">
-            <a href="book_detail.php">
-              <div class="p-3 bg-white border rounded text-center cards">
-                <img src="img/web.jpg" alt="">
-                <p>"Explore the foundations of modern web architecture, including client-server models, APIs, microservices, and scalable design patterns. This guide helps developers build robust, efficient, and maintainable web applications."</p>
-              </div>
-            </a>
-          </div>
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/producing.jpg" alt="">
-              <p>A practical guide to successfully leading and managing open source projects. This book covers collaboration, licensing, community building, infrastructure, and the social dynamics behind sustainable open source development.</p>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="book_detail.php">
-            <div class="p-3 bg-white border rounded text-center cards">
-              <img src="img/information.jpg" alt="">
-              <p>Learn how to structure and organize digital content for clarity, usability, and efficiency. This book introduces core principles of information architecture, helping designers and developers create intuitive websites and apps that users can navigate with ease</p>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-<?php
-  include 'footer.php';
-?>
+</body>
+</html>

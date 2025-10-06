@@ -1,238 +1,215 @@
 <?php
-  include 'header.php';
+require_once 'config/settings.php';
+require_once 'includes/auth.php';
+require_once 'includes/functions.php';
+require_once 'models/Book.php';
+require_once "config/database.php";
+include 'includes/header.php';
+
+$database = new Database();
+$conn = $database->getConnection();
+
+// Handle book rental only if user is logged in
+if (!empty($_SESSION['user_id']) && $_POST && isset($_POST['rent_book'])) {
+    require_once 'models/Rental.php';
+    $rental = new Rental();
+    $rental->user_id = $_SESSION['user_id'];
+    $rental->book_id = intval($_POST['book_id']);
+    $rental->due_date = date('Y-m-d', strtotime('+' . RENTAL_PERIOD_DAYS . ' days'));
+
+    if ($rental->getUserActiveRentalsCount($_SESSION['user_id']) >= MAX_BOOKS_PER_USER) {
+        $error_message = 'You have reached the maximum limit of ' . MAX_BOOKS_PER_USER . ' books.';
+    } elseif ($rental->create()) {
+        header("Location: search.php?rented=success");
+        exit();
+    } else {
+        $error_message = 'Unable to rent book. Please try again.';
+    }
+} elseif (isset($_POST['rent_book'])) {
+    // Guest tried to rent a book
+    $error_message = 'You must be logged in to rent a book.';
+}
+
+// Show success message if redirected
+if (isset($_GET['rented']) && $_GET['rented'] == 'success') {
+    $success_message = 'Book rented successfully!';
+}
+
+// Fetch categories from the table
+$query = "SELECT DISTINCT category FROM books ORDER BY category ASC";
+$result = $conn->prepare($query);
+$result->execute();
+$types = $result->fetchAll(PDO::FETCH_COLUMN);
+
+// Search keyword
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+
+// Default query
+$sql = "SELECT * FROM books WHERE 1=1";
+$params = [];
+
+// Keyword filter
+if (!empty($keyword)) {
+    $sql .= " AND (title LIKE :keyword OR author LIKE :keyword OR description LIKE :keyword)";
+    $params[':keyword'] = '%' . $keyword . '%';
+}
+
+// Year filter
+if (isset($_GET['year']) && $_GET['year'] !== 'all') {
+    $sql .= " AND publication_year = :year";
+    $params[':year'] = $_GET['year'];
+}
+
+// Availability filter
+if (isset($_GET['availability'])) {
+    $sql .= " AND available_copies > 0";
+}
+
+// Category filter
+if (isset($_GET['collectionType']) && is_array($_GET['collectionType']) && count($_GET['collectionType']) > 0) {
+    $placeholders = [];
+    foreach ($_GET['collectionType'] as $index => $type) {
+        $key = ":collectionType$index";
+        $placeholders[] = $key;
+        $params[$key] = $type;
+    }
+    $sql .= " AND category IN (" . implode(',', $placeholders) . ")";
+}
+
+// Execute query
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-  <!-- Main Content -->
-  <div class="container my-4">
+
+<!-- Main Content -->
+<div class="container my-4">
     <div class="row">
+        <?php if (isset($success_message)): ?>
+            <div class="alert alert-success"><?php echo $success_message; ?></div>
+        <?php endif; ?>
 
-      <!-- Sidebar Filters -->
-      <aside class="sidebar book_filter col-lg-3 mb-4">
-        <div class="card border-0">
-          <div class="card-body">
-            <h5 class="card-title">Filters</h5>
+        <?php if (isset($error_message)): ?>
+            <div class="alert alert-danger"><?php echo $error_message; ?></div>
+        <?php endif; ?>
 
-            <form id="filtersForm">
-              <!-- Publication Year -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Publication Year</label>
-                <div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="year" id="yearAll" value="all" checked />
-                    <label class="form-check-label" for="yearAll">All</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="year" id="year2023" value="2023" />
-                    <label class="form-check-label" for="year2023">2023</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="year" id="year2022" value="2022" />
-                    <label class="form-check-label" for="year2022">2022</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="year" id="year2021" value="2021" />
-                    <label class="form-check-label" for="year2021">2021</label>
-                  </div>
-                </div>
-              </div>
+        <!-- Sidebar Filters -->
+        <aside class="sidebar book_filter col-lg-3 mb-4">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Filters</h5>
+                    <form id="filtersForm" method="GET" action="">
+                        <!-- Publication Year -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Publication Year</label>
+                            <div>
+                                <?php
+                                $years = ['all' => 'All', '2023' => '2023', '2022' => '2022', '2021' => '2021'];
+                                foreach ($years as $value => $label) {
+                                    $checked = (isset($_GET['year']) && $_GET['year'] == $value) || (!isset($_GET['year']) && $value == 'all') ? 'checked' : '';
+                                    echo "
+                                        <div class='form-check'>
+                                            <input class='form-check-input' type='radio' name='year' id='year$value' value='$value' $checked />
+                                            <label class='form-check-label' for='year$value'>$label</label>
+                                        </div>
+                                    ";
+                                }
+                                ?>
+                            </div>
+                        </div>
 
-              <!-- Availability -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Availability</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="availability" id="availabilityOnShelf" value="onShelf" />
-                  <label class="form-check-label" for="availabilityOnShelf">On Shelf</label>
-                </div>
-              </div>
+                        <!-- Availability -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Availability</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="availability" id="availabilityOnShelf" value="onShelf"
+                                <?= isset($_GET['availability']) ? 'checked' : '' ?> />
+                                <label class="form-check-label" for="availabilityOnShelf">On Shelf</label>
+                            </div>
+                        </div>
 
-              <!-- Attachment -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Attachment</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentPdf" value="pdf" />
-                  <label class="form-check-label" for="attachmentPdf">PDF</label>
+                        <!-- Category Type -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Category Type</label>
+                            <?php
+                            $selectedTypes = isset($_GET['collectionType']) ? (array)$_GET['collectionType'] : [];
+                            foreach ($types as $type) {
+                                $safeType = htmlspecialchars($type);
+                                $checked = in_array($type, $selectedTypes) ? 'checked' : '';
+                                echo "
+                                    <div class='form-check'>
+                                        <input class='form-check-input' type='checkbox' 
+                                            name='collectionType[]' id='collection$safeType' 
+                                            value='$safeType' $checked />
+                                        <label class='form-check-label' for='collection$safeType'>" . ucfirst($safeType) . "</label>
+                                    </div>
+                                ";
+                            }
+                            ?>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentAudio" value="audio" />
-                  <label class="form-check-label" for="attachmentAudio">Audio</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="attachment" id="attachmentVideo" value="video" />
-                  <label class="form-check-label" for="attachmentVideo">Video</label>
-                </div>
-              </div>
-
-              <!-- Collection Type -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Collection Type</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionReference" value="reference" />
-                  <label class="form-check-label" for="collectionReference">Reference</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionTextbook" value="textbook" />
-                  <label class="form-check-label" for="collectionTextbook">Textbook</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="collectionType" id="collectionFiction" value="fiction" />
-                  <label class="form-check-label" for="collectionFiction">Fiction</label>
-                </div>
-              </div>
-
-              <!-- General Material Designation -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">General Material Designation</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="material" id="materialText" value="text" />
-                  <label class="form-check-label" for="materialText">Text</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="material" id="materialArt" value="art" />
-                  <label class="form-check-label" for="materialArt">Art Original</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="material" id="materialChart" value="chart" />
-                  <label class="form-check-label" for="materialChart">Chart</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="material" id="materialSoftware" value="software" />
-                  <label class="form-check-label" for="materialSoftware">Computer Software</label>
-                </div>
-              </div>
-
-              <!-- Location -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Location</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="location" id="locationMyLibrary" value="myLibrary" />
-                  <label class="form-check-label" for="locationMyLibrary">My Library</label>
-                </div>
-              </div>
-
-              <!-- Language -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Language</label>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="language" id="languageEnglish" value="english" />
-                  <label class="form-check-label" for="languageEnglish">English</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="language" id="languageIndonesia" value="indonesia" />
-                  <label class="form-check-label" for="languageIndonesia">Indonesia</label>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main Area -->
-      <main class="col-lg-9">
-
-        <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 p-3">
-            <div class="mb-2">
-                Found<strong> 15</strong> from your keywords:
             </div>
-            <div class="d-flex align-items-center">
-                <label for="sortBy" class="form-label mb-0" style="min-width:65px;"><strong>Sort by</strong></label>
-                <select class="form-select form-select-sm" id="sortBy">
-                <option selected>Most relevant</option>
-                <option>Newest</option>
-                <option>Title A-Z</option>
-                <option>Title Z-A</option>
-                </select>
-            </div>
-        </div>
+        </aside>
 
-        <!-- Results Info -->
-        <div id="resultsInfo" class="mb-3 text-muted fw-semibold">
-            <div class="card p-3 mb-4 bg-light">
-                <div class="row g-3">
-                <div class="col-auto">
-                    <img src="img/ajax.jpg" alt="PostgreSQL book" class="book-image" />
-                </div>
-                <div class="col">
-                    <h5 class="card-title">
-                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
-                    </h5>
+        <!-- Main Area -->
+        <main class="col-lg-9">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 p-3">
+                <?php if (count($books) === 0): ?>
+                    <p>No books found.</p>
+                <?php else: ?>
                     <div class="mb-2">
-                    <span class="tag">Douglas, Korry</span>
-                    <span class="tag">Douglas, Susan</span>
+                        Found <strong><?= count($books) ?></strong> result<?= count($books) !== 1 ? 's' : '' ?>.
                     </div>
-                    <p class="card-text description">
-                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
-                    </p>
-                </div>
-                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
-                    <div class="availability-box">1</div>
-                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
-                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
-                    </div>
-                </div>
-                </div>
+                <?php endif; ?>
             </div>
-            <div class="card p-3 mb-4 bg-light">
-                <div class="row g-3">
-                <div class="col-auto">
-                    <img src="img/postgres.jpg" alt="PostgreSQL book" class="book-image" />
-                </div>
-                <div class="col">
-                    <h5 class="card-title">
-                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
-                    </h5>
-                    <div class="mb-2">
-                    <span class="tag">Douglas, Korry</span>
-                    <span class="tag">Douglas, Susan</span>
-                    </div>
-                    <p class="card-text description">
-                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
-                    </p>
-                </div>
-                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
-                    <div class="availability-box">1</div>
-                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
-                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <div class="card p-3 mb-4 bg-light">
-                <div class="row g-3">
-                <div class="col-auto">
-                    <img src="img/information.jpg " alt="PostgreSQL book" class="book-image" />
-                </div>
-                <div class="col">
-                    <h5 class="card-title">
-                    <a href="">PostgreSQL : a comprehensive guide to building, programming, and administering...</a>
-                    </h5>
-                    <div class="mb-2">
-                    <span class="tag">Douglas, Korry</span>
-                    <span class="tag">Douglas, Susan</span>
-                    </div>
-                    <p class="card-text description">
-                    PostgreSQL is the world's most advanced open-source database. PostgreSQL is the most comprehensive, in-depth, and easy-to-read guide to this award-winning database. This book starts with a thorough overview of SQL, a description of all PostgreSQL data types, and a complete explanation of PostgreSQL commands.
-                    </p>
-                </div>
-                <div class="col-auto d-flex flex-column align-items-center justify-content-between">
-                    <div class="availability-box">1</div>
-                    <div class="btn-group-vertical" role="group" aria-label="Action buttons">
-                    <button type="button" class="btn btn-outline-primary btn-sm">MARC Download</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm">Cite</button>
-                    </div>
-                </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Pagination -->
-        <nav aria-label="Page navigation example" class="mt-4">
-          <ul class="pagination justify-content-center" id="pagination"></ul>
-        </nav>
-      </main>
+            <!-- Book List -->
+            <div id="resultsInfo" class="mb-3 text-muted fw-semibold">
+                <?php foreach ($books as $book): ?>
+                    <div class="card p-3 mb-4 bg-light">
+                        <div class="row g-3">
+                            <div class="col-auto">
+                                <img src="img/<?= htmlspecialchars($book['cover_image']) ?>" alt="<?= htmlspecialchars($book['title']) ?>" class="book-image" />
+                            </div>
+                            <div class="col">
+                                <h5 class="card-title">
+                                    <a href="book_detail.php?id=<?= $book['book_id'] ?>"><?= htmlspecialchars($book['title']) ?></a>
+                                </h5>
+                                <div class="mb-2"><span class="tag"><?= htmlspecialchars($book['author']) ?></span></div>
+                                <p class="card-text description"><?= htmlspecialchars(mb_strimwidth($book['description'], 0, 300, "...")) ?></p>
+                            </div>
+                            <div class="col-auto d-flex flex-column align-items-center justify-content-between">
+                                <div class="availability-box"><span>Availability</span><?= $book['available_copies'] ?></div>
+
+                                <?php if (!empty($_SESSION['user_id'])): ?>
+                                    <form method="POST" action="">
+                                        <input type="hidden" name="book_id" value="<?= $book['book_id'] ?>">
+                                        <?php if ($book['available_copies'] > 0): ?>
+                                            <button type="submit" name="rent_book" class="btn btn-outline-primary">Rent Book</button>
+                                        <?php else: ?>
+                                            <button class="btn btn-secondary px-4" disabled>Unavailable</button>
+                                        <?php endif; ?>
+                                    </form>
+                                <?php else: ?>
+                                    <a href="customer_login.php" class="btn btn-outline-primary">Login to Rent</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </main>
     </div>
-  </div>
+</div>
 
-<?php
-  include 'footer.php';
-?>
+<!-- Auto-submit filters form -->
+<script>
+document.querySelectorAll('#filtersForm input').forEach(input => {
+    input.addEventListener('change', () => {
+        document.getElementById('filtersForm').submit();
+    });
+});
+</script>
+
+<?php include 'includes/footer.php'; ?>
