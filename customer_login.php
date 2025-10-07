@@ -48,7 +48,7 @@ if ($_POST) {
                         <button type="submit" class="btn btn-primary px-5 mb-5 w-100">Login</button>
                     </div>
                     <div id="emailHelp" class="form-text text-center mb-5 text-dark">
-                        Not Registered? <a href="member_register.php" class="text-dark fw-bold">Create an Account</a>
+                        Not Registered? <a href="customer_register.php" class="text-dark fw-bold">Create an Account</a>
                     </div>
                 </form>
             </div>
