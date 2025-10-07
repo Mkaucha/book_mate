@@ -170,7 +170,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="card p-3 mb-4 bg-light">
                         <div class="row g-3">
                             <div class="col-auto">
-                                <img src="img/<?= htmlspecialchars($book['cover_image']) ?>" alt="<?= htmlspecialchars($book['title']) ?>" class="book-image" />
+                                <img src="img/<?= htmlspecialchars($book['cover_image']) ?>" alt="<?= htmlspecialchars($book['title']) ?>" class="book-image mw-100" />
                             </div>
                             <div class="col">
                                 <h5 class="card-title">
