@@ -66,15 +66,15 @@ CREATE TABLE notifications (
 INSERT INTO users (username, email, password, full_name, user_type) 
 VALUES ('admin', 'admin@bookmate.com', '$2y$10$VlbJEw3iM8tA7NqdynkFXupjnPK78dFWRITsgXyFNW0zJ5l5Sdd1i', 'System Administrator', 'admin');
 
--- Insert sample books
+-- Insert sample books with cover images
 INSERT INTO books 
-(isbn, title, author, publisher, category, publication_year, total_copies, available_copies, description)
+(isbn, title, author, publisher, category, publication_year, total_copies, available_copies, description, cover_image)
 VALUES
-('9780141439518', 'Pride and Prejudice', 'Jane Austen', 'Penguin Classics', 'Fiction', 1813, 3, 3, 'A romantic novel of manners written by Jane Austen in 1813.'),
-('9780061120084', 'To Kill a Mockingbird', 'Harper Lee', 'Harper Perennial Modern Classics', 'Fiction', 1960, 2, 2, 'A gripping tale of racial injustice and loss of innocence.'),
-('9780544003415', 'The Lord of the Rings', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 'Fantasy', 1954, 4, 4, 'Epic fantasy adventure in Middle-earth.'),
-('9780132350884', 'Clean Code', 'Robert C. Martin', 'Prentice Hall', 'Technology', 2008, 2, 2, 'A handbook of agile software craftsmanship.'),
-('9780596517748', 'JavaScript: The Good Parts', 'Douglas Crockford', 'O Reilly Media', 'Technology', 2008, 1, 1, 'Unearthing the excellence in JavaScript.');
+('9780141439518', 'Pride and Prejudice', 'Jane Austen', 'Penguin Classics', 'Fiction', 1813, 3, 3, 'A romantic novel of manners written by Jane Austen in 1813.', 'pride.jpg'),
+('9780061120084', 'To Kill a Mockingbird', 'Harper Lee', 'Harper Perennial Modern Classics', 'Fiction', 1960, 2, 2, 'A gripping tale of racial injustice and loss of innocence.', 'mockingbird.jpg'),
+('9780544003415', 'The Lord of the Rings', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 'Fantasy', 1954, 4, 4, 'Epic fantasy adventure in Middle-earth.', 'lorings.jpg'),
+('9780132350884', 'Clean Code', 'Robert C. Martin', 'Prentice Hall', 'Technology', 2008, 2, 2, 'A handbook of agile software craftsmanship.', 'cleancode.jpg'),
+('9780596517748', 'JavaScript: The Good Parts', 'Douglas Crockford', 'O Reilly Media', 'Technology', 2008, 1, 1, 'Unearthing the excellence in JavaScript.', 'javascript.jpg');
 
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
