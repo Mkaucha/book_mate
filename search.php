@@ -81,7 +81,7 @@ $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
+<section class="search-section">
 <!-- Main Content -->
 <div class="container my-4">
     <div class="row">
@@ -202,7 +202,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </main>
     </div>
 </div>
-
+</section>
 <!-- Auto-submit filters form -->
 <script>
 document.querySelectorAll('#filtersForm input').forEach(input => {

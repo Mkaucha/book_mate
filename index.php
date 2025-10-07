@@ -1,36 +1,32 @@
 <?php
-require_once 'config/settings.php';
-require_once 'includes/auth.php';
+    require_once 'config/settings.php';
+    require_once 'includes/auth.php';
 
-function sanitize($value) {
-    return htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
-}
-
-if (isLoggedIn()) {
-    if (isAdmin()) {
-        header("Location: admin_dashboard.php");
-    } else {
-        header("Location: home.php");
+    function sanitize($value) {
+        return htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
     }
-    exit();
-}
 
-$login_error = '';
-if ($_POST) {
-    $username = isset($_POST['username']) ? sanitize($_POST['username']) : '';
-    $password = isset($_POST['password']) ? $_POST['password'] : '';
-
-    if (login($username, $password)) {
-        if (isAdmin()) {
-            header("Location: admin_dashboard.php");
-        } else {
-            header("Location: home.php");
-        }
+    // If admin is already logged in, redirect to home
+    if (isAdminLoggedIn()) {
+        header("Location: index.php");
         exit();
-    } else {
-        $login_error = 'Invalid username or password';
     }
-}
+    $login_error = '';
+    $username = '';
+    $password = '';
+
+    if ($_POST) {
+        $username = isset($_POST['username']) ? sanitize($_POST['username']) : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+
+        if (!login($username, $password, 'admin')) {
+            $login_error = 'Invalid credentials or not an admin.';
+        } else {
+            // Successful admin login
+            header("Location: admin_dashboard.php");
+            exit();
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">

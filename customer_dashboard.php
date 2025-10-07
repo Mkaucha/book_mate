@@ -7,7 +7,6 @@ require_once 'models/User.php';
 require_once 'models/Book.php';
 include 'includes/header.php';
 
-requireLogin();
 
 $user = new User();
 $book = new Book();
