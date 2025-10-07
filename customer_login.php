@@ -8,29 +8,19 @@ function sanitize($value) {
 }
 
 // If user is already logged in, redirect to home
-if (isLoggedIn()) {
+if (isCustomerLoggedIn()) {
     header("Location: home.php");
     exit();
 }
 
 $login_error = '';
+
 if ($_POST) {
     $username = isset($_POST['username']) ? sanitize($_POST['username']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
-
-    if (login($username, $password)) {
-        // Prevent admin from logging in here
-        if (!empty($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin') {
-            session_unset();
-            session_destroy();
-            $login_error = 'Admin users are not allowed to login here.';
-        } else {
-            // Redirect regular users to home
-            header("Location: home.php");
-            exit();
-        }
-    } else {
-        $login_error = 'Invalid username or password';
+    
+    if (!login($username, $password, 'customer')) {
+        $login_error = 'Invalid credentials or not a customer.';
     }
 }
 ?>

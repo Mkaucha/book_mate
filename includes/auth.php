@@ -1,27 +1,33 @@
 <?php
 // includes/auth.php
+
+//  Detect page context and start separate sessions for admin & customer
 if (session_status() === PHP_SESSION_NONE) {
+    $currentScript = basename($_SERVER['PHP_SELF']);
+
+    if (strpos($currentScript, 'admin') !== false) {
+        // Admin pages use separate session
+        session_name('admin_session');
+    } else {
+        // Customer and general pages use customer session
+        session_name('customer_session');
+    }
+
     session_start();
 }
 
-// Add better error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require_once 'config/database.php';
 
-function login($username, $password) {
+// UNIVERSAL LOGIN FUNCTION
+function login($username, $password, $allowedRole = null) {
     try {
         $database = new Database();
         $db = $database->getConnection();
 
-        if (!$db) {
-            echo "Database connection failed";
-            return false;
-        }
-
+        // Fetch user from database
         $query = "SELECT user_id, username, email, password, full_name, user_type, status 
-                  FROM users WHERE username = :username AND status = 'active'";
+                  FROM users 
+                  WHERE username = :username AND status = 'active'";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
@@ -29,49 +35,101 @@ function login($username, $password) {
         if ($stmt->rowCount() > 0) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Debugging output: uncomment these lines if login fails
-            // echo "Entered username: " . $username . "<br>";
-            // echo "Database username: " . $user['username'] . "<br>";
-            // echo "Password verify result: " . (password_verify($password, $user['password']) ? 'true' : 'false') . "<br>";
-
+            // Verify password
             if (password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['username'] = $user['username'];
+
+                // Restrict login if a specific role is required
+                if ($allowedRole && $user['user_type'] !== $allowedRole) {
+                    return false; // Not allowed to login on this page
+                }
+
+                // Use separate session names for admin and customer
+                if (session_status() === PHP_SESSION_NONE) {
+                    if ($user['user_type'] === 'admin') {
+                        session_name('admin_session');
+                    } else {
+                        session_name('customer_session');
+                    }
+                    session_start();
+                }
+
+                // Set session variables
+                $_SESSION['logged_in'] = true;
+                $_SESSION['user_id']   = $user['user_id'];
+                $_SESSION['username']  = $user['username'];
                 $_SESSION['user_type'] = $user['user_type'];
                 $_SESSION['full_name'] = $user['full_name'];
-                $_SESSION['logged_in'] = true;
-                return true;
+
+                // Redirect based on user type
+                if ($user['user_type'] === 'admin') {
+                    header("Location: admin_dashboard.php");
+                } else {
+                    header("Location: home.php");
+                }
+                exit();
             }
         }
-        return false;
+
+        return false; // Invalid credentials
     } catch (Exception $e) {
         echo "Login error: " . $e->getMessage();
         return false;
     }
 }
 
+
+//  Logout functions for both roles
 function logout() {
-    session_destroy();
-    header("Location: index.php");
+    session_name("admin_session"); // target the admin session
+    session_start();               // start that session
+    session_destroy();             // destroy it
+    header("Location: index.php"); // redirect to login page
     exit();
 }
 
-function customerLogout(){
-    session_destroy();
-    header("Location: home.php");
+function customerLogout() {
+    session_name("customer_session"); // target the customer session
+    session_start();                  // start that session
+    session_destroy();                // destroy it
+    header("Location: home.php");     // redirect to home or login
     exit();
 }
 
-function isLoggedIn() {
-    return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+//  Session role checks
+// function isLoggedIn() {
+//     return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+// }
+
+// function isAdmin() {
+//     return isLoggedIn() && ($_SESSION['user_type'] ?? '') === 'admin';
+// }
+
+// function isCustomer() {
+//     return isLoggedIn() && ($_SESSION['user_type'] ?? '') === 'customer';
+// }
+// Check if customer session exists
+function isCustomerLoggedIn() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_name("customer_session"); // Customer session
+        session_start();
+    }
+    return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true
+           && ($_SESSION['user_type'] ?? '') === 'customer';
 }
 
-function isAdmin() {
-    return isLoggedIn() && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin';
+// Check if admin session exists
+function isAdminLoggedIn() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_name("admin_session"); // Admin session
+        session_start();
+    }
+    return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true
+           && ($_SESSION['user_type'] ?? '') === 'admin';
 }
 
+//  Access restrictions
 function requireLogin() {
-    if (!isLoggedIn()) {
+    if (!isAdminLoggedIn()) {
         header("Location: index.php");
         exit();
     }
@@ -79,18 +137,27 @@ function requireLogin() {
 
 function requireAdmin() {
     requireLogin();
-    if (!isAdmin()) {
+    if (!isAdminLoggedIn()) {
         header("Location: home.php");
         exit();
     }
 }
 
+function requireCustomer() {
+    requireLogin();
+    if (!isCustomerLoggedIn()) {
+        header("Location: admin_dashboard.php");
+        exit();
+    }
+}
+
+//  Register new user (always as customer)
 function registerUser($username, $email, $password, $full_name, $phone = '', $address = '') {
     try {
         $database = new Database();
         $db = $database->getConnection();
 
-        // Check if username or email already exists
+        // Duplicate check
         $query = "SELECT user_id FROM users WHERE username = :username OR email = :email";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':username', $username);
@@ -98,13 +165,13 @@ function registerUser($username, $email, $password, $full_name, $phone = '', $ad
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            return false; // User already exists
+            return false;
         }
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO users (username, email, password, full_name, phone, address) 
-                  VALUES (:username, :email, :password, :full_name, :phone, :address)";
+        $query = "INSERT INTO users (username, email, password, full_name, phone, address, user_type, status)
+                  VALUES (:username, :email, :password, :full_name, :phone, :address, 'customer', 'active')";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':email', $email);

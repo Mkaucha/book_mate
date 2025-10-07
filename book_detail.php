@@ -6,6 +6,8 @@ require_once 'models/Book.php';
 require_once "config/database.php";
 include 'includes/header.php';
 
+isCustomerLoggedIn();
+
 // Handle book rental only if user is logged in
 if (!empty($_SESSION['user_id']) && $_POST && isset($_POST['rent_book'])) {
     require_once 'models/Rental.php';
