@@ -1,7 +1,7 @@
 <?php
 require_once 'config/settings.php';
 require_once 'includes/auth.php';
-require_once 'includes/functions.php'; // sanitize, etc.
+require_once 'includes/functions.php'; // sanitize.
 include 'includes/header.php';
 
 // Redirect if already logged in
@@ -14,12 +14,12 @@ $registration_error = '';
 $registration_success = false;
 
 if ($_POST) {
-    $first_name = sanitize($_POST['first_name'] ?? '');
-    $last_name = sanitize($_POST['last_name'] ?? '');
-    $full_name = trim($first_name . ' ' . $last_name);
+
+    $username = sanitize($_POST['username'] ?? '');
     $email = sanitize($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
+    $full_name = sanitize($_POST['full_name'] ?? '');
     $phone = sanitize($_POST['phone'] ?? '');
     $address = sanitize($_POST['address'] ?? '');
 
@@ -30,11 +30,9 @@ if ($_POST) {
         $registration_error = 'Password must be at least 6 characters long.';
     } elseif ($password !== $confirm_password) {
         $registration_error = 'Passwords do not match.';
-    } elseif (registerUser($full_name, $email, $password, $phone, $address)) {
+    } elseif (registerUser($username, $email, $password, $full_name, $phone, $address)) {
         $registration_success = true;
-        // Redirect to login page after successful registration
-        header("Location: customer_login.php?registered=1");
-        exit();
+        
     } else {
         $registration_error = 'Email or username already exists.';
     }
@@ -60,33 +58,30 @@ if ($_POST) {
                                 <?php else: ?>
                                     <form class="user" method="POST" action="">
                                         <div class="form-group row mb-3">
-                                            <div class="col-sm-6">
-                                                <label><b>First Name</b></label>
-                                                <input type="text" name="first_name" class="form-control form-control-user" placeholder="First Name" required
-                                                    value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>">
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label><b>Last Name</b></label>
-                                                <input type="text" name="last_name" class="form-control form-control-user" placeholder="Last Name" required
-                                                    value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>">
-                                            </div>
+                                                <label><b>User Name</b></label>
+                                                <input type="text" name="username" class="form-control form-control-user" placeholder="User Name" required
+                                                    value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
                                         </div>
-
                                         <div class="form-group mb-3">
                                             <label><b>Email Address</b></label>
                                             <input type="email" name="email" class="form-control form-control-user" placeholder="Email Address" required
                                                 value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                                         </div>
+                                        <div class="form-group mb-3">
+                                            <label for="full_name">Full Name:</label>
+                                            <input type="text" id="full_name" class="form-control form-control-user" name="full_name" placeholder="Full Name" required 
+                                                value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>">
+                                        </div>
 
                                         <div class="form-group mb-3">
                                             <label><b>Phone</b></label>
-                                            <input type="tel" name="phone" class="form-control form-control-user" placeholder="Phone"
+                                            <input type="tel" name="phone" class="form-control form-control-user" placeholder="Phone" required
                                                 value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
                                         </div>
 
                                         <div class="form-group mb-3">
                                             <label><b>Address</b></label>
-                                            <textarea name="address" class="form-control form-control-user" placeholder="Address"><?php echo htmlspecialchars($_POST['address'] ?? ''); ?></textarea>
+                                            <textarea name="address" class="form-control form-control-user" placeholder="Address" required ><?php echo htmlspecialchars($_POST['address'] ?? ''); ?></textarea>
                                         </div>
 
                                         <div class="form-group row mb-3">
