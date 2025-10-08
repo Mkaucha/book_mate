@@ -62,10 +62,10 @@
 
                 <button type="submit" class="btn btn-primary btn-full">Login</button>
             </form>
-
+<!-- 
             <div class="login-links">
                 <a href="register.php">Create New Account</a>
-            </div>
+            </div> -->
 
             <div class="demo-accounts">
                 <h3>Demo Accounts</h3>
